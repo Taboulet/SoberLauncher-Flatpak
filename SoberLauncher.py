@@ -1125,6 +1125,6 @@ def apply_dark_blue_theme_if_no_theme(app: QApplication):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle(QStyleFactory.create("Breeze"))
-print("Qt style:", app.style().objectName())
+    print("Qt style:", app.style().objectName())
     window = SoberLauncher()
     sys.exit(app.exec())
