@@ -18,10 +18,10 @@ a = Analysis(
         'PyQt6.QtCore',
         'PyQt6.QtSvg',
         'PyQt6.sip',
-        'breeze_resources',  
+        'breeze_resources',
     ],
     hookspath=[],
-    hooksconfig={},   #
+    hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
