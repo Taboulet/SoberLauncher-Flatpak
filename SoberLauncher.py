@@ -1122,22 +1122,11 @@ def apply_dark_blue_theme_if_no_theme(app: QApplication):
 
 
 if __name__ == "__main__":
-    import breeze_resources  # provided by PyQtBreezeStyleSheets
     app = QApplication(sys.argv)
 
-    # Force readable text colors
-    palette = app.palette()
-    palette.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
-    palette.setColor(QPalette.ColorRole.Text, Qt.GlobalColor.white)
-    palette.setColor(QPalette.ColorRole.ButtonText, Qt.GlobalColor.white)
-    app.setPalette(palette)
-
-    # Apply Breeze Dark stylesheet
-    from PyQt6.QtCore import QFile
-    file = QFile(":/dark.qss")
-    if file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
-        app.setStyleSheet(str(file.readAll(), encoding="utf-8"))
-        file.close()
+        qss_path = "/app/share/soberlauncher/dark.qss"
+    with open(qss_path) as f:
+        app.setStyleSheet(f.read())
 
     window = SoberLauncher()
     sys.exit(app.exec())
