@@ -21,7 +21,7 @@ a = Analysis(
         'PyQt6.sip',
     ],
     hookspath=[],
-    hooksconfig=[]  
+    hooksconfig=[],
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
