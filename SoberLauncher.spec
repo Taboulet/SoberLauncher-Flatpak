@@ -18,6 +18,7 @@ a = Analysis(
         'PyQt6.QtCore',
         'PyQt6.QtSvg',
         'PyQt6.sip',
+        'qdarkstyle',
     ],
     hookspath=[],
     hooksconfig={},
