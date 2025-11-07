@@ -1125,6 +1125,6 @@ def apply_dark_blue_theme_if_no_theme(app: QApplication):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyleSheet(qdarktheme.load_stylesheet(qt_api='pyqt6'))
+    app.setStyleSheet(qdarktheme.load_stylesheet("dark"))
     window = SoberLauncher()
     sys.exit(app.exec())
