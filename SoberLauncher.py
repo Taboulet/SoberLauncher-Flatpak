@@ -8,7 +8,7 @@ import json
 import re
 import pathlib
 from PyQt6.QtWidgets import QApplication
-import qdarkstyle
+import qdarktheme
 
 def resource_path(rel_path: str) -> str:
     """
@@ -1125,6 +1125,6 @@ def apply_dark_blue_theme_if_no_theme(app: QApplication):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
+    app.setStyleSheet(qdarktheme.load_stylesheet(qt_api='pyqt6'))
     window = SoberLauncher()
     sys.exit(app.exec())
