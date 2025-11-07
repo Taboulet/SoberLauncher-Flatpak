@@ -1124,9 +1124,9 @@ def apply_dark_blue_theme_if_no_theme(app: QApplication):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-        qss_path = "/app/share/soberlauncher/dark.qss"
-    with open(qss_path) as f:
+   import breeze_resources
+    with open(":/dark.qss") as f:
         app.setStyleSheet(f.read())
-
+    
     window = SoberLauncher()
     sys.exit(app.exec())
