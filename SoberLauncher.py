@@ -7,6 +7,7 @@ import shutil
 import json
 import re
 import pathlib
+from PyQt6.QtWidgets import QApplication, QStyleFactory
 
 def resource_path(rel_path: str) -> str:
     """
@@ -1123,10 +1124,6 @@ def apply_dark_blue_theme_if_no_theme(app: QApplication):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
-   import breeze_resources
-    with open(":/dark.qss") as f:
-        app.setStyleSheet(f.read())
-    
+    app.setStyle(QStyleFactory.create("Breeze"))
     window = SoberLauncher()
     sys.exit(app.exec())
