@@ -1,12 +1,24 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+block_cipher = None
 
 a = Analysis(
     ['SoberLauncher.py'],
     pathex=[],
     binaries=[],
-    datas=[('SoberLauncher.svg', '.')],
-    hiddenimports=['PyQt6', 'PyQt6.QtWidgets', 'PyQt6.QtGui', 'PyQt6.QtCore', 'qdarktheme'],
+    datas=[
+        ('SoberLauncher.svg', '.'),
+        ('org.taboulet.SoberLauncher.desktop', '.'),
+    ],
+    hiddenimports=[
+        'pkgutil',
+        'PyQt6',
+        'PyQt6.QtWidgets',
+        'PyQt6.QtGui',
+        'PyQt6.QtCore',
+        'PyQt6.QtSvg',
+        'qdarktheme',
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -14,7 +26,8 @@ a = Analysis(
     noarchive=False,
     optimize=0,
 )
-pyz = PYZ(a.pure)
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
