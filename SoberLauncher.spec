@@ -1,5 +1,3 @@
-# SoberLauncher.spec
-
 # -*- mode: python ; coding: utf-8 -*-
 
 block_cipher = None
@@ -10,7 +8,7 @@ a = Analysis(
     binaries=[],
     datas=[],
     hiddenimports=[
-        'qdarkstyle',        # <-- add this line
+        'qdarkstyle',     
     ],
     hookspath=[],
     hooksconfig={},
