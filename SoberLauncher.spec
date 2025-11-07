@@ -17,8 +17,8 @@ a = Analysis(
         'PyQt6.QtGui',
         'PyQt6.QtCore',
         'PyQt6.QtSvg',
-        'qdarktheme',
         'PyQt6.sip',
+        'breeze_resources',   # from PyQtBreezeStyleSheets
     ],
     hookspath=[],
     hooksconfig={},   # full Qt wheel present, no need to disable
