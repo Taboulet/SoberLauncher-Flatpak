@@ -21,7 +21,7 @@ a = Analysis(
         'PyQt6.sip',
     ],
     hookspath=[],
-    hooksconfig=[],
+    hooksconfig={'qt_plugins': []},  # disable Qt plugin collection
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
