@@ -8,6 +8,7 @@ import json
 import re
 import pathlib
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
 import qdarktheme
 # --- Force-theme-icons-white: monkey-patch QIcon.fromTheme to return white-tinted icons ---
 from PyQt6.QtGui import QPainter
