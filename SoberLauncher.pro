@@ -21,11 +21,11 @@ build.commands = \
     python3 -m PyInstaller --noconfirm SoberLauncher.spec
 
 install.commands = \
-    install -Dm755 $$binary_out $$app_prefix/bin/SoberLauncher && \
-    ( [ -f flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop ] && install -Dm644 flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop $$app_prefix/share/applications/io.github.taboulet.SoberLauncher-Flatpak.desktop ) || \
-    ( [ -f flatpak/org.taboulet.SoberLauncher.desktop ] && install -Dm644 flatpak/org.taboulet.SoberLauncher.desktop $$app_prefix/share/applications/org.taboulet.SoberLauncher.desktop ) || true && \
-    ( [ -f flatpak/SoberLauncher.svg ] && install -Dm644 flatpak/SoberLauncher.svg $$app_prefix/share/icons/hicolor/scalable/apps/io.github.taboulet.SoberLauncher-Flatpak.svg ) || \
-    ( [ -f io.github.taboulet.SoberLauncher-Flatpak.svg ] && install -Dm644 io.github.taboulet.SoberLauncher-Flatpak.svg $$app_prefix/share/icons/hicolor/scalable/apps/io.github.taboulet.SoberLauncher-Flatpak.svg ) || true
+  install -Dm755 $$binary_out $$app_prefix/bin/SoberLauncher && \
+  ( [ -f flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop ] && install -Dm644 flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop $$app_prefix/share/applications/io.github.taboulet.SoberLauncher-Flatpak.desktop ) || \
+  ( [ -f flatpak/org.taboulet.SoberLauncher.desktop ] && install -Dm644 flatpak/org.taboulet.SoberLauncher.desktop $$app_prefix/share/applications/org.taboulet.SoberLauncher.desktop ) || true && \
+  ( [ -f flatpak/SoberLauncher.svg ] && install -Dm644 flatpak/SoberLauncher.svg $$app_prefix/share/icons/hicolor/scalable/apps/io.github.taboulet.SoberLauncher-Flatpak.svg ) || \
+  ( [ -f flatpak/io.github.taboulet.SoberLauncher-Flatpak.svg ] && install -Dm644 flatpak/io.github.taboulet.SoberLauncher-Flatpak.svg $$app_prefix/share/icons/hicolor/scalable/apps/io.github.taboulet.SoberLauncher-Flatpak.svg ) || true
 
 # Clean target
 clean.commands = \
