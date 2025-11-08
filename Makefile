@@ -1,5 +1,5 @@
 all:
-    ***python3 -m pip install --no-deps --prefix=/app pyqtdarktheme altgraph
+    python3 -m pip install --no-deps --prefix=/app pyqtdarktheme altgraph
     python3 -m pip install --no-deps --prefix=/app PyQt6==6.8.0 PyQt6-sip==13.10.2 PyQt6-Qt6==6.8.1
     python3 -m pip install --no-deps --prefix=/app pyinstaller
     PATH="/app/bin:$$PATH" pyinstaller --noconfirm SoberLauncher.spec
