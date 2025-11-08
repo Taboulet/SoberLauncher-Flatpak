@@ -7,83 +7,16 @@ import shutil
 import json
 import re
 import pathlib
-from PyQt6.QtWidgets import QApplication, QStyleFactory
+from PyQt6.QtWidgets import QApplication
+import qdarktheme
 
 def resource_path(rel_path: str) -> str:
     """
-    Return path to resource whether running normally or frozen by PyInstaller.
+    Resolve a resource path both for normal runs and PyInstaller onefile (_MEIPASS).
+    Returns a filesystem path to a file (not to a directory).
     """
     base = getattr(sys, "_MEIPASS", os.path.dirname(__file__))
     return os.path.join(base, rel_path)
-
-
-def executable_dir() -> str:
-    """
-    Directory to place writable settings file:
-    - When running from source: directory of SoberLauncher.py
-    - When frozen with PyInstaller: directory of the executable (sys.argv[0])
-    """
-    if getattr(sys, "frozen", False):
-        return os.path.dirname(sys.argv[0])
-    return os.path.dirname(__file__)
-
-
-def settings_location_filename() -> str:
-    """
-    Return the full path where the runtime writable settings file lives.
-    This will be <same-folder-as-script-or-exe>/SL_Settings.json
-    """
-    return os.path.join(executable_dir(), "SL_Settings.json")
-
-
-def ensure_bundled_default_settings_available():
-    """
-    If no SL_Settings.json exists next to the exe/script, copy the bundled default
-    SL_Settings.json (if present inside source tree or PyInstaller _MEIPASS) to that location.
-    This makes a writable copy next to the exe so builds are fused but runtime settings remain writable.
-    """
-    dest = settings_location_filename()
-    if os.path.exists(dest):
-        return dest
-
-    # Look for bundled default either next to source or inside packaged data
-    bundled_candidates = [
-        os.path.join(os.path.dirname(__file__), "SL_Settings.json"),
-        resource_path("SL_Settings.json"),
-    ]
-    for src in bundled_candidates:
-        try:
-            if src and os.path.isfile(src):
-                shutil.copyfile(src, dest)
-                try:
-                    os.chmod(dest, 0o600)
-                except Exception:
-                    pass
-                return dest
-        except Exception:
-            pass
-
-    # No bundled default available: create a minimal default
-    try:
-        default = {
-            "Name": "[Name]",
-            "PrivateServers": [],
-            "roblox_player_enabled": False,
-            "AllowMultiInstance": False,
-        }
-        with open(dest, "w", encoding="utf-8") as f:
-            json.dump(default, f, ensure_ascii=False, indent=2)
-        return dest
-    except Exception:
-        # fall back to a temp in user home (shouldn't happen, but safe)
-        tmp = os.path.join(os.path.expanduser("~"), ".SoberLauncher_default_SL_Settings.json")
-        try:
-            with open(tmp, "w", encoding="utf-8") as f:
-                json.dump(default, f, ensure_ascii=False, indent=2)
-            return tmp
-        except Exception:
-            return dest
-
 
 def resolve_data_root(app_id: str) -> str:
     """
@@ -112,7 +45,6 @@ def resolve_data_root(app_id: str) -> str:
     os.makedirs(data_root, exist_ok=True)
     return data_root
 
-
 def ensure_is_file(path: str, where: str = ""):
     """
     Debug/assert helper: call before loading pixmap/icon to ensure we're passing a file.
@@ -121,7 +53,6 @@ def ensure_is_file(path: str, where: str = ""):
     if os.path.isdir(path):
         print(f"ERROR: expected file but got directory for {where}: {path}")
         raise ValueError(f"Expected file but got directory for {where}: {path}")
-
 
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
@@ -195,17 +126,18 @@ class CopyProfileThread(QThread):
 class SoberLauncher(QWidget):
     def __init__(self):
         super().__init__()
-        self.app_id = "io.github.taboulet.SoberLauncher-Flatpak"
+        self.app_id = "org.taboulet.SoberLauncher"
         self.data_root = resolve_data_root(self.app_id)
         self.base_dir = self.data_root  # always use the resolved data dir
 
-        # Settings file lives under the per-user .var/app/<app-id>/data/SoberLauncher
-        self.settings_json = os.path.join(self.data_root, "SL_Settings.json")
         # State
         self.profiles = []
         self.selected_profiles = []
         self.processes = {}            # profile_name -> subprocess.Popen
         self.launched_profiles = set() # profiles launched during this session
+
+        # Settings file always in data_root (no last_directory anywhere)
+        self.settings_json = os.path.join(self.data_root, "SL_Settings.json")
 
         # Settings
         self.display_name = "[Name]"
@@ -565,10 +497,7 @@ class SoberLauncher(QWidget):
         layout = QVBoxLayout()
 
         icon_label = QLabel()
-        try:
-            icon_label.setPixmap(QPixmap(resource_path("SoberLauncher.svg")))
-        except Exception:
-            pass
+        icon_label.setPixmap(QPixmap(resource_path("SoberLauncher.svg")))
         title_label = QLabel("<b>Sober Launcher</b><br>An easy launcher to control all your Sober Instances<br><br><i>Author: Taboulet</i>")
         version_label = QLabel(f"<b>Current Version:</b> {__version__}")
 
@@ -1099,10 +1028,7 @@ Terminal=false
         self.setLayout(wrapper_layout)
 
         self.setWindowTitle("Sober Launcher")
-        try:
-            self.setWindowIcon(QIcon(resource_path("SoberLauncher.svg")))
-        except Exception:
-            pass
+        self.setWindowIcon(QIcon(resource_path("SoberLauncher.svg")))
 
         self.applyWindowStartupMode()
         QTimer.singleShot(0, self.applyMultiInstanceUIState)
@@ -1138,12 +1064,16 @@ Terminal=false
             if hasattr(self, "missingInstancesLabel"):
                 self.missingInstancesLabel.setText("Launched instances not running: None")
 
+    # ------------- Startup window mode -------------
+
     def applyWindowStartupMode(self):
         desktop = os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
         if "gamescope" in desktop or os.environ.get("STEAMDECK", "") == "1":
             self.showFullScreen()
         else:
             self.showMaximized()
+
+    # ------------- Open base directory -------------
 
     def openBaseDirectory(self):
         # ensure dir exists and is canonical
@@ -1157,6 +1087,8 @@ Terminal=false
         except Exception:
             pass
 
+    # ------------- Selection updates -------------
+
     def updateSelectedProfiles(self):
         self.selected_profiles = [item.text() for item in self.profileList.selectedItems()]
         self.selectedProfileLabel.setText(
@@ -1164,9 +1096,35 @@ Terminal=false
         )
 
 
+def apply_dark_blue_theme_if_no_theme(app: QApplication):
+    if not QIcon.themeName():
+        app.setStyle("Fusion")
+        palette = QPalette()
+
+        dark_gray = QColor(30, 30, 30)
+        mid_gray = QColor(45, 45, 45)
+        light_gray = QColor(200, 200, 200)
+        text_gray = QColor(220, 220, 220)
+        blue = QColor("#1e3a8a")
+
+        palette.setColor(QPalette.ColorRole.Window, dark_gray)
+        palette.setColor(QPalette.ColorRole.WindowText, text_gray)
+        palette.setColor(QPalette.ColorRole.Base, QColor(25, 25, 25))
+        palette.setColor(QPalette.ColorRole.AlternateBase, mid_gray)
+        palette.setColor(QPalette.ColorRole.ToolTipBase, light_gray)
+        palette.setColor(QPalette.ColorRole.ToolTipText, QColor(20, 20, 20))
+        palette.setColor(QPalette.ColorRole.Text, text_gray)
+        palette.setColor(QPalette.ColorRole.Button, mid_gray)
+        palette.setColor(QPalette.ColorRole.ButtonText, text_gray)
+        palette.setColor(QPalette.ColorRole.BrightText, QColor(255, 0, 0))
+        palette.setColor(QPalette.ColorRole.Link, QColor("#60a5fa"))
+        palette.setColor(QPalette.ColorRole.Highlight, blue)
+        palette.setColor(QPalette.ColorRole.HighlightedText, QColor(240, 240, 240))
+        app.setPalette(palette)
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # Use system/platform default Qt style; do not force qdarktheme
-    print("Qt style:", app.style().objectName())
+    app.setStyleSheet(qdarktheme.load_stylesheet("dark"))
     window = SoberLauncher()
     sys.exit(app.exec())
