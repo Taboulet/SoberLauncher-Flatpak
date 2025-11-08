@@ -2,7 +2,7 @@
 Name=SoberLauncher
 Comment=An easy launcher to control all your Sober Instances
 Exec=SoberLauncher
-Icon=org.taboulet.SoberLauncher
+Icon=io.github.taboulet.SoberLauncher-Flatpak
 Terminal=false
 Type=Application
 Categories=GNOME;GTK;Game;
