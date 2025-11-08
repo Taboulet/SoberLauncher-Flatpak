@@ -15,6 +15,8 @@ build.commands = \
     python3 -m pip install --no-deps --prefix=$$app_prefix pyqtdarktheme altgraph && \
     python3 -m pip install --no-deps --prefix=$$app_prefix PyQt6==6.8.0 PyQt6_sip==13.10.2 PyQt6_Qt6==6.8.1 && \
     python3 -m pip install --no-deps --prefix=$$app_prefix pyinstaller && \
+    cp -v flatpak/org.taboulet.SoberLauncher.desktop ./org.taboulet.SoberLauncher.desktop && \
+    cp -v flatpak/SoberLauncher.svg ./SoberLauncher.svg && \
     python3 -m PyInstaller --noconfirm SoberLauncher.spec
 
 # Install: place binary and desktop/icon into /app
