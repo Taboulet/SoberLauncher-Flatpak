@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.taboulet.SoberLauncher-Flatpak</id>
+  <name>SoberLauncher</name>
+  <summary>An easy launcher to control all your Sober Instances</summary>
+
+  <developer_name>Taboulet</developer_name>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <url type="homepage">https://github.com/Taboulet/SoberLauncher-Flatpak</url>
+
+  <description>
+    <p>
+      An easy launcher to control all your Sober Instances and launch Sober with more advanced parameters.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.taboulet.SoberLauncher-Flatpak.desktop</launchable>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://github.com/Taboulet/SoberLauncher-Flatpak/raw/main/SoberLauncherExampleImage.png</image>
+      <caption>Main interface for launching Sober instances</caption>
+    </screenshot>
+  </screenshots>
+
+  <releases>
+    <release version="1.0" date="2025-11-08">
+      <description>
+        <p>Initial Flathub release.</p>
+      </description>
+    </release>
+  </releases>
+
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-cartoon">none</content_attribute>
+    <content_attribute id="violence-fantasy">none</content_attribute>
+    <content_attribute id="violence-realistic">none</content_attribute>
+    <content_attribute id="violence-bloodshed">none</content_attribute>
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="drugs-narcotics">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="money-gambling">none</content_attribute>
+  </content_rating>
+
+  <categories>
+    <category>Utility</category>
+  </categories>
+
+  <icon type="stock">io.github.taboulet.SoberLauncher-Flatpak</icon>
+</component>
