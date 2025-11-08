@@ -8,7 +8,7 @@ a = Analysis(
     binaries=[],
     datas=[
         ('SoberLauncher.svg', '.'),
-        ('org.taboulet.SoberLauncher.desktop', '.'),
+        ('io.github.taboulet.SoberLauncher-Flatpak.desktop', '.'),
     ],
     hiddenimports=[
         'pkgutil',
