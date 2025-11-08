@@ -9,7 +9,6 @@ import re
 import pathlib
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
-import qdarktheme
 # --- Force-theme-icons-white: monkey-patch QIcon.fromTheme to return white-tinted icons ---
 from PyQt6.QtGui import QPainter
 _orig_qicon_from_theme = QIcon.fromTheme
@@ -1180,9 +1179,10 @@ def apply_dark_blue_theme_if_no_theme(app: QApplication):
 
 
 if __name__ == "__main__":
+    import qdarktheme
     app = QApplication(sys.argv)
 
-    # portable AA flags (avoid AttributeError on different PyQt6 builds)
+    # Apply HiDPI attributes if available (safe checks)
     try:
         if hasattr(Qt, "AA_EnableHighDpiScaling"):
             QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
@@ -1212,50 +1212,15 @@ if __name__ == "__main__":
     except Exception:
         pass
 
-    # Try to apply qdarktheme (single explicit call)
-    applied = False
+    # Strict: apply qdarktheme only (no fallbacks)
     try:
-        import qdarktheme
-        # preferred API
-        try:
-            qdarktheme.setup_theme("dark")
-            applied = True
-        except Exception:
-            # some versions accept no args
-            try:
-                qdarktheme.setup_theme()
-                applied = True
-            except Exception:
-                pass
+        print("qdarktheme version:", getattr(qdarktheme, "__version__", "<unknown>"))
+        qdarktheme.setup_theme("dark")
+        print("qdarktheme applied")
+    except Exception as e:
+        # keep minimal: print the error so you can see why it failed
+        print("qdarktheme.setup_theme failed:", repr(e))
 
-        # fallback alternative APIs if setup_theme not present
-        if not applied:
-            for fn in ("set_theme", "apply_stylesheet", "load_stylesheet", "install"):
-                if hasattr(qdarktheme, fn):
-                    try:
-                        getattr(qdarktheme, fn)("dark")
-                        applied = True
-                        break
-                    except TypeError:
-                        try:
-                            getattr(qdarktheme, fn)()
-                            applied = True
-                            break
-                        except Exception:
-                            pass
-    except Exception:
-        applied = False
-
-    if not applied:
-        # fallback to system style (Breeze)
-        try:
-            app.setStyle(QStyleFactory.create("Breeze"))
-        except Exception:
-            try:
-                app.setStyle(QStyleFactory.create(app.style().objectName()))
-            except Exception:
-                pass
-
-
+    # Show main window
     window = SoberLauncher()
     sys.exit(app.exec())
