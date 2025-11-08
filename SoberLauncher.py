@@ -9,6 +9,61 @@ import re
 import pathlib
 from PyQt6.QtWidgets import QApplication
 import qdarktheme
+# --- Force-theme-icons-white: monkey-patch QIcon.fromTheme to return white-tinted icons ---
+from PyQt6.QtGui import QPainter
+_orig_qicon_from_theme = QIcon.fromTheme
+
+def _tint_pixmap_to_color(pix: QPixmap, color: str) -> QPixmap:
+    if pix.isNull():
+        return pix
+    sized = QPixmap(pix.size())
+    sized.fill(Qt.GlobalColor.transparent)
+    p = QPainter(sized)
+    p.drawPixmap(0, 0, pix)
+    p.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
+    p.fillRect(sized.rect(), QColor(color))
+    p.end()
+    return sized
+
+def _fromTheme_tinted(name: str, fallback: str = None, mode=QIcon.Mode.Normal, state=QIcon.State.Off, size: int = 24, color: str = "#ffffff") -> QIcon:
+    """
+    Replacement for QIcon.fromTheme that returns a white-tinted icon when possible.
+    - name: theme icon name (same as original API)
+    - fallback: optional fallback name (same as original)
+    - size: pixel size used to request a pixmap for tinting (24 default)
+    - color: hex color used for tinting (white default)
+    """
+    # Try original call first
+    try:
+        icon = _orig_qicon_from_theme(name, fallback)
+    except Exception:
+        try:
+            icon = QIcon(name)
+        except Exception:
+            return QIcon()
+    # If icon is null, return whatever we have
+    if icon.isNull():
+        return icon
+
+    # Request a pixmap and tint it
+    try:
+        pix = icon.pixmap(size, size, mode, state)
+        if pix and not pix.isNull():
+            return QIcon(_tint_pixmap_to_color(pix, color))
+    except Exception:
+        pass
+
+    # Fall back to returning the raw icon if tinting fails
+    return icon
+
+# Replace the method used in code: QIcon.fromTheme(name, fallback) -> our wrapper.
+def _wrapper_fromTheme(name: str, fallback: str = None) -> QIcon:
+    # use 24px default and white tint; callers that expect raw QIcon still get an icon
+    return _fromTheme_tinted(name, fallback, size=24, color="#ffffff")
+
+QIcon.fromTheme = staticmethod(_wrapper_fromTheme)
+# --- end patch ---
+
 
 def resource_path(rel_path: str) -> str:
     """
@@ -1125,6 +1180,81 @@ def apply_dark_blue_theme_if_no_theme(app: QApplication):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyleSheet(qdarktheme.load_stylesheet("dark"))
+
+    # portable AA flags (avoid AttributeError on different PyQt6 builds)
+    try:
+        if hasattr(Qt, "AA_EnableHighDpiScaling"):
+            QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+        elif hasattr(Qt, "ApplicationAttribute") and hasattr(Qt.ApplicationAttribute, "AA_EnableHighDpiScaling"):
+            QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
+    except Exception:
+        pass
+
+    try:
+        if hasattr(Qt, "AA_UseHighDpiPixmaps"):
+            QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+        elif hasattr(Qt, "ApplicationAttribute") and hasattr(Qt.ApplicationAttribute, "AA_UseHighDpiPixmaps"):
+            QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
+    except Exception:
+        pass
+
+    # Apply UI scale (150%)
+    try:
+        f = app.font()
+        base = f.pointSizeF()
+        if not base or base <= 0:
+            base = f.pixelSize() or 10
+            f.setPixelSize(int(base * 1.5))
+        else:
+            f.setPointSizeF(base * 1.5)
+        app.setFont(f)
+    except Exception:
+        pass
+
+    # Try to apply qdarktheme (single explicit call)
+    applied = False
+    try:
+        import qdarktheme
+        # preferred API
+        try:
+            qdarktheme.setup_theme("dark")
+            applied = True
+        except Exception:
+            # some versions accept no args
+            try:
+                qdarktheme.setup_theme()
+                applied = True
+            except Exception:
+                pass
+
+        # fallback alternative APIs if setup_theme not present
+        if not applied:
+            for fn in ("set_theme", "apply_stylesheet", "load_stylesheet", "install"):
+                if hasattr(qdarktheme, fn):
+                    try:
+                        getattr(qdarktheme, fn)("dark")
+                        applied = True
+                        break
+                    except TypeError:
+                        try:
+                            getattr(qdarktheme, fn)()
+                            applied = True
+                            break
+                        except Exception:
+                            pass
+    except Exception:
+        applied = False
+
+    if not applied:
+        # fallback to system style (Breeze)
+        try:
+            app.setStyle(QStyleFactory.create("Breeze"))
+        except Exception:
+            try:
+                app.setStyle(QStyleFactory.create(app.style().objectName()))
+            except Exception:
+                pass
+
+
     window = SoberLauncher()
     sys.exit(app.exec())
