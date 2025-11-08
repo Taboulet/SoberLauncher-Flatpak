@@ -14,15 +14,11 @@ build.commands = \
     python3 -m pip install --no-deps --prefix=$$app_prefix pyqtdarktheme altgraph && \
     python3 -m pip install --no-deps --prefix=$$app_prefix PyQt6==6.8.0 PyQt6_sip==13.10.2 PyQt6_Qt6==6.8.1 && \
     python3 -m pip install --no-deps --prefix=$$app_prefix pyinstaller && \
-    # copy any desktop file the repo may have into buildroot under both names the spec might use
-    [ -f flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop ] && cp -v flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop ./io.github.taboulet.SoberLauncher-Flatpak.desktop || true && \
-    [ -f flatpak/org.taboulet.SoberLauncher.desktop ] && cp -v flatpak/org.taboulet.SoberLauncher.desktop ./org.taboulet.SoberLauncher.desktop || true && \
-    # also make sure one of them exists at the alternate name the spec might expect
-    if [ -f io.github.taboulet.SoberLauncher-Flatpak.desktop ] && [ ! -f org.taboulet.SoberLauncher.desktop ]; then cp -v io.github.taboulet.SoberLauncher-Flatpak.desktop org.taboulet.SoberLauncher.desktop; fi && \
-    if [ -f org.taboulet.SoberLauncher.desktop ] && [ ! -f io.github.taboulet.SoberLauncher-Flatpak.desktop ]; then cp -v org.taboulet.SoberLauncher.desktop io.github.taboulet.SoberLauncher-Flatpak.desktop; fi && \
-    # find any svg in flatpak/ and copy it to SoberLauncher.svg if present (avoid failing if missing)
-    sh -c 'for f in flatpak/*.svg; do [ -f "$$f" ] && cp -v "$$f" ./SoberLauncher.svg && break; done' && \
-    # run PyInstaller as a module (avoids wrapper/path issues)
+    ( [ -f flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop ] && cp -v flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop ./io.github.taboulet.SoberLauncher-Flatpak.desktop ) || true && \
+    ( [ -f flatpak/org.taboulet.SoberLauncher.desktop ] && cp -v flatpak/org.taboulet.SoberLauncher.desktop ./org.taboulet.SoberLauncher.desktop ) || true && \
+    ( if [ -f io.github.taboulet.SoberLauncher-Flatpak.desktop ] && [ ! -f org.taboulet.SoberLauncher.desktop ]; then cp -v io.github.taboulet.SoberLauncher-Flatpak.desktop org.taboulet.SoberLauncher.desktop; fi ) && \
+    ( if [ -f org.taboulet.SoberLauncher.desktop ] && [ ! -f io.github.taboulet.SoberLauncher-Flatpak.desktop ]; then cp -v org.taboulet.SoberLauncher.desktop io.github.taboulet.SoberLauncher-Flatpak.desktop; fi ) && \
+    ( for f in flatpak/*.svg; do [ -f "$$f" ] && cp -v "$$f" ./SoberLauncher.svg && break; done ) || true && \
     python3 -m PyInstaller --noconfirm SoberLauncher.spec
 
 # Install: place binary and desktop/icon into /app
