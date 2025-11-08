@@ -7,8 +7,10 @@ import shutil
 import json
 import re
 import pathlib
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
+from PyQt6.QtWidgets import QApplication, QStyleFactory
+from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor, QPalette, QBrush
+from PyQt6.QtCore import QTimer, Qt, QThread, pyqtSignal
+import qdarktheme
 # --- Force-theme-icons-white: monkey-patch QIcon.fromTheme to return white-tinted icons ---
 from PyQt6.QtGui import QPainter
 _orig_qicon_from_theme = QIcon.fromTheme
@@ -1179,10 +1181,16 @@ def apply_dark_blue_theme_if_no_theme(app: QApplication):
 
 
 if __name__ == "__main__":
-    import qdarktheme
     app = QApplication(sys.argv)
 
-    # Apply HiDPI attributes if available (safe checks)
+    # Apply qdarktheme stylesheet directly (original behaviour)
+    try:
+        app.setStyleSheet(qdarktheme.load_stylesheet("dark"))
+    except Exception:
+        # fallback: no stylesheet applied
+        pass
+
+    # portable AA flags (avoid AttributeError on different PyQt6 builds)
     try:
         if hasattr(Qt, "AA_EnableHighDpiScaling"):
             QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
@@ -1212,15 +1220,15 @@ if __name__ == "__main__":
     except Exception:
         pass
 
-    # Strict: apply qdarktheme only (no fallbacks)
+    # If qdarktheme failed above, fall back to system style
     try:
-        print("qdarktheme version:", getattr(qdarktheme, "__version__", "<unknown>"))
-        qdarktheme.setup_theme("dark")
-        print("qdarktheme applied")
-    except Exception as e:
-        # keep minimal: print the error so you can see why it failed
-        print("qdarktheme.setup_theme failed:", repr(e))
+        if not app.styleSheet():
+            app.setStyle(QStyleFactory.create("Breeze"))
+    except Exception:
+        try:
+            app.setStyle(QStyleFactory.create(app.style().objectName()))
+        except Exception:
+            pass
 
-    # Show main window
     window = SoberLauncher()
     sys.exit(app.exec())
