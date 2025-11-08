@@ -8,6 +8,7 @@ icon_file = flatpak/SoberLauncher.svg
 binary_out = dist/SoberLauncher
 
 build.commands = \
+    python3 -m pip install --upgrade pip && \
     python3 -m pip install --no-deps --prefix=$$app_prefix pyqtdarktheme altgraph && \
     python3 -m pip install --no-deps --prefix=$$app_prefix PyQt6==6.8.0 PyQt6_sip==13.10.2 PyQt6_Qt6==6.8.1 && \
     python3 -m pip install --no-deps --prefix=$$app_prefix pyinstaller && \
