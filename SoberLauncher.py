@@ -11,61 +11,6 @@ from PyQt6.QtWidgets import QApplication, QStyleFactory
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor, QPalette, QBrush
 from PyQt6.QtCore import QTimer, Qt, QThread, pyqtSignal
 import qdarktheme
-# --- Force-theme-icons-white: monkey-patch QIcon.fromTheme to return white-tinted icons ---
-from PyQt6.QtGui import QPainter
-_orig_qicon_from_theme = QIcon.fromTheme
-
-def _tint_pixmap_to_color(pix: QPixmap, color: str) -> QPixmap:
-    if pix.isNull():
-        return pix
-    sized = QPixmap(pix.size())
-    sized.fill(Qt.GlobalColor.transparent)
-    p = QPainter(sized)
-    p.drawPixmap(0, 0, pix)
-    p.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
-    p.fillRect(sized.rect(), QColor(color))
-    p.end()
-    return sized
-
-def _fromTheme_tinted(name: str, fallback: str = None, mode=QIcon.Mode.Normal, state=QIcon.State.Off, size: int = 24, color: str = "#ffffff") -> QIcon:
-    """
-    Replacement for QIcon.fromTheme that returns a white-tinted icon when possible.
-    - name: theme icon name (same as original API)
-    - fallback: optional fallback name (same as original)
-    - size: pixel size used to request a pixmap for tinting (24 default)
-    - color: hex color used for tinting (white default)
-    """
-    # Try original call first
-    try:
-        icon = _orig_qicon_from_theme(name, fallback)
-    except Exception:
-        try:
-            icon = QIcon(name)
-        except Exception:
-            return QIcon()
-    # If icon is null, return whatever we have
-    if icon.isNull():
-        return icon
-
-    # Request a pixmap and tint it
-    try:
-        pix = icon.pixmap(size, size, mode, state)
-        if pix and not pix.isNull():
-            return QIcon(_tint_pixmap_to_color(pix, color))
-    except Exception:
-        pass
-
-    # Fall back to returning the raw icon if tinting fails
-    return icon
-
-# Replace the method used in code: QIcon.fromTheme(name, fallback) -> our wrapper.
-def _wrapper_fromTheme(name: str, fallback: str = None) -> QIcon:
-    # use 24px default and white tint; callers that expect raw QIcon still get an icon
-    return _fromTheme_tinted(name, fallback, size=24, color="#ffffff")
-
-QIcon.fromTheme = staticmethod(_wrapper_fromTheme)
-# --- end patch ---
-
 
 def resource_path(rel_path: str) -> str:
     """
@@ -929,8 +874,7 @@ Terminal=false
         self.selectDirButton.clicked.connect(self.openBaseDirectory)
         top_bar.addWidget(self.selectDirButton)
 
-        self.refreshButton = QPushButton()
-        self.refreshButton.setIcon(QIcon.fromTheme("view-refresh"))
+        self.refreshButton = QPushButton("Refresh")
         self.refreshButton.setToolTip("Refresh Profiles")
         self.refreshButton.clicked.connect(self.scanForProfiles)
         top_bar.addWidget(self.refreshButton)
@@ -1005,8 +949,7 @@ Terminal=false
         self.runMissingButton.clicked.connect(self.runMissingInstances)
         self.bottom_layout.addWidget(self.runMissingButton)
 
-        self.runMissingWithLinkButton = QPushButton()
-        self.runMissingWithLinkButton.setIcon(QIcon.fromTheme("internet-web-browser"))
+        self.runMissingWithLinkButton = QPushButton("Link")
         self.runMissingWithLinkButton.setToolTip("Run Missing Instances with Game Link")
         self.runMissingWithLinkButton.clicked.connect(self.runMissingInstancesWithLink)
         self.bottom_layout.addWidget(self.runMissingWithLinkButton)
@@ -1036,9 +979,8 @@ Terminal=false
         self.displayNameLabel.setFont(font)
         name_row.addWidget(self.displayNameLabel)
 
-        pencil_btn = QPushButton()
-        pencil_btn.setIcon(QIcon.fromTheme("document-edit"))
-        pencil_btn.setFixedSize(32, 32)
+        pencil_btn = QPushButton("Edit")
+        pencil_btn.setFixedSize(48, 32)
         pencil_btn.setToolTip("Edit name")
         pencil_btn.clicked.connect(self.editDisplayName)
         name_row.addWidget(pencil_btn)
