@@ -1,35 +1,38 @@
-# SoberLauncher.pro — qmake-driven build for a Python/PyInstaller app
+# SoberLauncher.pro — qmake-driven build for a Python/PyInstaller app (online pip)
 TEMPLATE = aux
 CONFIG += no_qt
 TARGET = SoberLauncher
 
 # Paths (use qmake $$ expansion)
 app_prefix = /app
-desktop_file = flatpak/org.taboulet.SoberLauncher.desktop
-icon_file = flatpak/SoberLauncher.svg
+desktop_repo1 = flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop
+desktop_repo2 = flatpak/org.taboulet.SoberLauncher.desktop
+icon_repo_glob = flatpak/*.svg
 binary_out = dist/SoberLauncher
 
+# Build: upgrade pip, install packages into $$app_prefix, copy desktop/icon into build root, run PyInstaller via python -m
 build.commands = \
     python3 -m pip install --upgrade pip && \
     python3 -m pip install --no-deps --prefix=$$app_prefix pyqtdarktheme altgraph && \
     python3 -m pip install --no-deps --prefix=$$app_prefix PyQt6==6.8.0 PyQt6_sip==13.10.2 PyQt6_Qt6==6.8.1 && \
     python3 -m pip install --no-deps --prefix=$$app_prefix pyinstaller && \
-    ( [ -f flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop ] && cp -v flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop ./io.github.taboulet.SoberLauncher-Flatpak.desktop ) || true && \
-    ( [ -f flatpak/org.taboulet.SoberLauncher.desktop ] && cp -v flatpak/org.taboulet.SoberLauncher.desktop ./org.taboulet.SoberLauncher.desktop ) || true && \
-    ( if [ -f io.github.taboulet.SoberLauncher-Flatpak.desktop ] && [ ! -f org.taboulet.SoberLauncher.desktop ]; then cp -v io.github.taboulet.SoberLauncher-Flatpak.desktop org.taboulet.SoberLauncher.desktop; fi ) && \
-    ( if [ -f org.taboulet.SoberLauncher.desktop ] && [ ! -f io.github.taboulet.SoberLauncher-Flatpak.desktop ]; then cp -v org.taboulet.SoberLauncher.desktop io.github.taboulet.SoberLauncher-Flatpak.desktop; fi ) && \
-    ( for f in flatpak/*.svg; do [ -f "$$f" ] && cp -v "$$f" ./SoberLauncher.svg && break; done ) || true && \
+    ( [ -f $$desktop_repo1 ] && cp -v $$desktop_repo1 ./io.github.taboulet.SoberLauncher-Flatpak.desktop ) || true && \
+    ( [ -f $$desktop_repo2 ] && cp -v $$desktop_repo2 ./org.taboulet.SoberLauncher.desktop ) || true && \
+    ( [ -f io.github.taboulet.SoberLauncher-Flatpak.desktop ] && [ ! -f org.taboulet.SoberLauncher.desktop ] && cp -v io.github.taboulet.SoberLauncher-Flatpak.desktop org.taboulet.SoberLauncher.desktop || true ) && \
+    ( [ -f org.taboulet.SoberLauncher.desktop ] && [ ! -f io.github.taboulet.SoberLauncher-Flatpak.desktop ] && cp -v org.taboulet.SoberLauncher.desktop io.github.taboulet.SoberLauncher-Flatpak.desktop || true ) && \
+    ( for f in $$icon_repo_glob; do [ -f "$$f" ] && cp -v "$$f" ./SoberLauncher.svg && break; done ) || true && \
     python3 -m PyInstaller --noconfirm SoberLauncher.spec
 
-# Install: place binary and desktop/icon into /app
+# Install: robustly install binary and whichever desktop/icon exist
 install.commands = \
     install -Dm755 $$binary_out $$app_prefix/bin/SoberLauncher && \
-    install -Dm644 $$desktop_file $$app_prefix/share/applications/org.taboulet.SoberLauncher.desktop && \
-    install -Dm644 $$icon_file $$app_prefix/share/icons/hicolor/scalable/apps/org.taboulet.SoberLauncher.svg
+    ( [ -f flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop ] && install -Dm644 flatpak/io.github.taboulet.SoberLauncher-Flatpak.desktop $$app_prefix/share/applications/io.github.taboulet.SoberLauncher-Flatpak.desktop ) || \
+    ( [ -f flatpak/org.taboulet.SoberLauncher.desktop ] && install -Dm644 flatpak/org.taboulet.SoberLauncher.desktop $$app_prefix/share/applications/org.taboulet.SoberLauncher.desktop ) || true && \
+    ( [ -f flatpak/SoberLauncher.svg ] && install -Dm644 flatpak/SoberLauncher.svg $$app_prefix/share/icons/hicolor/scalable/apps/org.taboulet.SoberLauncher.svg ) || true
 
 # Clean target
 clean.commands = \
-    rm -rf build dist __pycache__
+    rm -rf build dist __pycache__ *.spec.spec
 
 # Wire up qmake targets
 QMAKE_EXTRA_TARGETS += build install clean
