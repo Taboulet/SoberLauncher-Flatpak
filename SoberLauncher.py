@@ -126,7 +126,7 @@ class CopyProfileThread(QThread):
 class SoberLauncher(QWidget):
     def __init__(self):
         super().__init__()
-        self.app_id = "org.taboulet.SoberLauncher"
+        self.app_id = "io.github.taboulet.SoberLauncher-Flatpak"
         self.data_root = resolve_data_root(self.app_id)
         self.base_dir = self.data_root  # always use the resolved data dir
 
